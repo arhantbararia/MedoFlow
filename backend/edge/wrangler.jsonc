@@ -1,0 +1,69 @@
+// MedoFlow API on Cloudflare — see development-log-docs/initial-deployment-WALKTHROUGH-AND-VERIFICATION.md
+//
+// Two deploy targets share one Worker name (`medoflow-api`):
+//   default            `wrangler deploy`                 — edge Worker only (works on the Workers Free plan)
+//   env.container      `wrangler deploy --env container` — edge Worker + Express API in a Cloudflare Container
+//                                                          (requires Workers Paid)
+// Secrets (never in this file): DATABASE_URL, JWT_SECRET, REDIS_URL, S3_ACCESS_KEY_ID,
+// S3_SECRET_ACCESS_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, OPENAI_API_KEY, …
+// Set with `wrangler secret put <NAME>` (add `--env container` for the container target).
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "medoflow-api",
+  "account_id": "523c0186a1808be62e718907053c513b",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+
+  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "5e50f409884f43a880c556fc15ccddf4" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "medoflow-files" }],
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+
+  "vars": {
+    "NODE_ENV": "production",
+    "CORS_ORIGIN": "https://medoflow-web.advertout-medoflow.workers.dev",
+    "FRONTEND_URL": "https://medoflow-web.advertout-medoflow.workers.dev",
+    "APP_URL": "https://medoflow-web.advertout-medoflow.workers.dev",
+    "TENANT_ISOLATION_MODE": "warn",
+    "S3_BUCKET": "medoflow-files",
+    "S3_REGION": "auto",
+    "S3_ENDPOINT": "https://523c0186a1808be62e718907053c513b.r2.cloudflarestorage.com"
+  },
+
+  "env": {
+    "container": {
+      "name": "medoflow-api",
+      "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "5e50f409884f43a880c556fc15ccddf4" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "medoflow-files" }],
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "vars": {
+        "NODE_ENV": "production",
+        "CORS_ORIGIN": "https://medoflow-web.advertout-medoflow.workers.dev",
+        "FRONTEND_URL": "https://medoflow-web.advertout-medoflow.workers.dev",
+        "APP_URL": "https://medoflow-web.advertout-medoflow.workers.dev",
+        "TENANT_ISOLATION_MODE": "warn",
+        "S3_BUCKET": "medoflow-files",
+        "S3_REGION": "auto",
+        "S3_ENDPOINT": "https://523c0186a1808be62e718907053c513b.r2.cloudflarestorage.com"
+      },
+      "containers": [
+        {
+          "class_name": "BackendContainer",
+          "image": "../Dockerfile",
+          "image_build_context": "..",
+          "instance_type": "standard-1",
+          "max_instances": 1
+        }
+      ],
+      "durable_objects": {
+        "bindings": [{ "name": "BACKEND", "class_name": "BackendContainer" }]
+      },
+      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["BackendContainer"] }],
+      // Keeps the single backend instance warm so node-cron and the BullMQ worker keep running.
+      "triggers": { "crons": ["*/5 * * * *"] }
+    }
+  }
+}

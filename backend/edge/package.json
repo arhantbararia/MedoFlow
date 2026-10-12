@@ -1,0 +1,23 @@
+{
+  "name": "medoflow-api-edge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare edge Worker + Container wrapper for the MedoFlow API",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "deploy": "wrangler deploy",
+    "deploy:container": "wrangler deploy --env container",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@types/node": "^25.3.3",
+    "@types/pg": "^8.15.5",
+    "typescript": "^5.9.3",
+    "wrangler": "4.86.0"
+  }
+}

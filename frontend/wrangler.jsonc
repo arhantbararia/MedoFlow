@@ -1,0 +1,16 @@
+// MedoFlow frontend (Next.js 14) on Cloudflare Workers via @opennextjs/cloudflare.
+// Build + deploy: `pnpm run cf:deploy`. NEXT_PUBLIC_* values are inlined at build
+// time from .env.production (or the CI environment), not from this file.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "medoflow-web",
+  "account_id": "523c0186a1808be62e718907053c513b",
+  "main": "cf-worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "medoflow-web" }]
+}
