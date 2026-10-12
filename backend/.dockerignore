@@ -1,7 +1,13 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
 .DS_Store
 *.log
 uploads
 api
+edge
+.wrangler
+coverage
+src/tests

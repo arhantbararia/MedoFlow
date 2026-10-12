@@ -1,0 +1,5 @@
+# gitleaks allow-list. Each entry must be a reviewed false positive with a reason.
+# backend/src/config/stripe.ts:3 — literal fallback 'sk_test_placeholder', not a credential.
+# (Making STRIPE_SECRET_KEY mandatory in production is tracked as B4.1 / F4.3.)
+230167b5b1bee447c7c2c5cb748f4b93a9e271ad:backend/src/config/stripe.ts:stripe-access-token:3
+backend/src/config/stripe.ts:stripe-access-token:3

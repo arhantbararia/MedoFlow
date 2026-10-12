@@ -1,21 +1,58 @@
-# Render Blueprint for MedoFlow Backend
+# Render Blueprint — MedoFlow backend (Express + Prisma + BullMQ)
 # https://render.com/docs/blueprint-spec
+#
+# Deploys are driven by GitHub Actions (.github/workflows/deploy.yml): CI builds and
+# typechecks first, then calls this service's Deploy Hook with the exact commit SHA.
+# Auto-deploy is therefore OFF so a failing build can never reach production.
+#
+# The frontend is NOT on Render — it is deployed to Cloudflare Workers by the same workflow.
 
 services:
   - type: web
     name: medoflow-backend
-    runtime: node
-
-    # Build from backend directory
-    rootDir: backend
-
-    # Build commands (--include=dev ensures @types/* are installed for tsc)
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build
-
-    # Start command (migrations run before start; Pre-Deploy is paid-only on Render)
-    startCommand: npx prisma migrate deploy && npm start
-
-    # Required env vars (set in Render Dashboard > Environment):
-    #   DATABASE_URL - from Render PostgreSQL addon
-    #   JWT_SECRET   - strong random string (e.g. openssl rand -base64 32)
-    # Optional: STRIPE_SECRET, FILE_SIZE_LIMIT_MB, CORS_ORIGIN
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Same AWS region as the Neon database (us-east-2).
+    region: ohio
+    # Choose a paid instance for anything beyond a demo: the free tier sleeps after
+    # 15 min idle, which pauses node-cron jobs and the BullMQ (AI scribe) worker.
+    plan: 0.5c-512mb
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TENANT_ISOLATION_MODE
+        value: warn
+      # Frontend origin(s) allowed by CORS (comma-separated).
+      - key: CORS_ORIGIN
+        value: https://medoflow-web.advertout-medoflow.workers.dev
+      - key: FRONTEND_URL
+        value: https://medoflow-web.advertout-medoflow.workers.dev
+      - key: APP_URL
+        value: https://medoflow-web.advertout-medoflow.workers.dev
+      - key: JWT_SECRET
+        generateValue: true
+      # ── Secrets: prompted once when the Blueprint is created ──────────────────
+      - key: DATABASE_URL # Neon *direct* (non-pooler) connection string
+        sync: false
+      - key: REDIS_URL # redis:// or rediss:// (eviction policy must be noeviction)
+        sync: false
+      - key: GROQ_API_KEY # AI front desk (voice agent); optional
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      # R2 (S3-compatible) file storage — leave unset to fall back to local disk.
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_BUCKET
+        value: medoflow-files
+      - key: S3_REGION
+        value: auto
+      - key: S3_ENDPOINT
+        value: https://523c0186a1808be62e718907053c513b.r2.cloudflarestorage.com

@@ -38,3 +38,12 @@ backend/prisma/generated/
 
 # Uploads
 backend/uploads/
+
+# Agent Docs
+arh-agent-docs/
+
+# Wrangler local state
+.wrangler/
+
+# OpenNext / Cloudflare build output
+.open-next/

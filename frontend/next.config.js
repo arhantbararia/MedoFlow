@@ -1,5 +1,12 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // pnpm workspace: dependencies live in the repo-root node_modules, so file
+  // tracing (used by the Cloudflare/OpenNext build) must start from the root.
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, '..'),
+  },
   // TEMPORARY: Vercel's --no-frozen-lockfile install pulls slightly different
   // minors of @hookform/resolvers vs local, and its stricter signature
   // rejects ZodEffects (schemas built with .refine()) in multiple forms.
