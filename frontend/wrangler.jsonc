@@ -1,6 +1,6 @@
 // MedoFlow frontend (Next.js 14) on Cloudflare Workers via @opennextjs/cloudflare.
 // Build + deploy: `pnpm run cf:deploy`. NEXT_PUBLIC_* values are inlined at build
-// time from .env.production (or the CI environment), not from this file.
+// time from the build environment (CI sets NEXT_PUBLIC_API_URL from the BACKEND_URL repo variable).
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "medoflow-web",

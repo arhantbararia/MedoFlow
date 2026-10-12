@@ -5,9 +5,10 @@ Owner: Security Officer (to be named per A.1) · Effective: 2026-10-12 · Tracki
 
 ## Rule
 
-The Cloudflare deployment (`medoflow-web` / `medoflow-api` on `*.advertout-medoflow.workers.dev`, Neon
-Postgres `medoflow-demo-db`, Hyperdrive `medoflow-neon`, R2 `medoflow-files`, Redis Cloud) is a
-**synthetic-data-only** environment for builds, demos, and pilots.
+The hosted demo environment (frontend `medoflow-web` on Cloudflare Workers, backend `medoflow-backend` on
+Render, Neon Postgres `medoflow-demo-db`, Hyperdrive `medoflow-neon`, R2 `medoflow-files`, Redis Cloud) is a
+**synthetic-data-only** environment for builds, demos, and pilots. The same gate applies to Render:
+no BAA is in place with Render, Neon, Redis Cloud or Cloudflare.
 
 **Real PHI must not be entered, imported, uploaded, or recorded into it** until B0.6.1 is resolved by
 **one** of:
